@@ -1,22 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct __attribute__((__packed__)) mbr_t{
+struct mbr_t{
     unsigned char mbr[446];
-};
+}__attribute__((__packed__));
 
-struct __attribute__((__packed__)) gpt_t{
+struct gpt_t{
     unsigned char gpt_p1[16];
     unsigned char gpt_p2[16];
     unsigned char gpt_p3[16];
     unsigned char gpt_p4[16];
     unsigned char gpt_end[2];
-};
+} __attribute__((packed));
 
-struct __attribute__((__packed__)) sctr1_t{
-    struct gpt_t gpt;
+struct sctr1_t{
     struct mbr_t mbr;
-};
+    struct gpt_t gpt;
+}__attribute__((__packed__));
 
 int main(void){
     struct mbr_t *mbr;
@@ -32,11 +32,20 @@ int main(void){
     printf("sizeof mbr_t = %d \n", (int) sizeof(*mbr));
     printf("sizeof sctr1_t = %d \n", (int) sizeof(*sctr1));
 
-    f_ptr = fopen("test1-fat-32","rb");
-    fread(sctr1,sizeof(sctr1),1,f_ptr);
+    f_ptr = fopen("test.img","rb");
+    fread(sctr1,sizeof(unsigned char),sizeof(*sctr1),f_ptr);
 
-    for(int i = 0; i<16; i++)
-        printf("%x ",sctr1->gpt.gpt_p1[i]);
+    // for(int i = 0; i<512; i++)
+    //     printf("%x ",(int)sctr1->gpt.gpt_p1[i]);
+
+    for(int i = 0; i<2; i++){
+        // if(i % 15 == 0)
+        //     printf("\n");
+        printf("%x ", sctr1->gpt.gpt_end[i]);
+        
+    }
+
+    printf("\n");
 
     return 0;
 }
